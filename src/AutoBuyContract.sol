@@ -16,13 +16,11 @@ contract AutoBuyContract is Ownable {
     address public proceedsDestination;
 
     error PoolNotMadeYet();
+    error UnauthorizedPool();
 
     constructor(IWETH9 weth_contract_, IUniswapV3Pool pool_, address proceedsDestination_) Ownable() {
         WETH_CONTRACT = weth_contract_;
-        
         pool = pool_;
-        WETH_CONTRACT.approve(address(pool), MAX_INT);
-        
         proceedsDestination = proceedsDestination_;
     }
 
@@ -30,9 +28,7 @@ contract AutoBuyContract is Ownable {
      * @dev This pool needs to have the token this contract should buy as token1, and WETH as token0.
      */
     function setPool(IUniswapV3Pool pool_) public onlyOwner {
-        WETH_CONTRACT.approve(address(pool), 0);
         pool = pool_;
-        WETH_CONTRACT.approve(address(pool), MAX_INT);
     }
 
     /**
@@ -40,6 +36,27 @@ contract AutoBuyContract is Ownable {
      */
     function setProceedsDestination(address proceedsDestination_) public onlyOwner {
         proceedsDestination = proceedsDestination_;
+    }
+
+    /// credit: https://github.com/jbx-protocol/juice-buyback/blob/b76f84b8bc55fad2f58ade2b304434cac52efc55/contracts/JBBuybackDelegate.sol#L323
+    /// @notice The Uniswap V3 pool callback where the token transfer is expected to happen.
+    /// @param _amount0Delta The amount of token 0 being used for the swap.
+    /// @param _amount1Delta The amount of token 1 being used for the swap.
+    /// @param _data Data passed in by the swap operation.
+    function uniswapV3SwapCallback(int256 _amount0Delta, int256 _amount1Delta, bytes calldata _data)
+        external
+    {
+        // Make sure this call is being made from within the swap execution.
+        if (msg.sender != address(pool)) revert UnauthorizedPool();
+
+        // Keep a reference to the amount of tokens that should be sent to fulfill the swap (the positive delta)
+        uint256 _amountToSendToPool = _amount0Delta < 0 ? uint256(_amount1Delta) : uint256(_amount0Delta);
+
+        // Wrap ETH into WETH
+        WETH_CONTRACT.deposit{value: _amountToSendToPool}();
+
+        // Transfer the token to the pool.
+        WETH_CONTRACT.transfer(msg.sender, _amountToSendToPool);
     }
 
     receive() external payable {
