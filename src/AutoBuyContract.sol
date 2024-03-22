@@ -4,9 +4,10 @@ pragma solidity ^0.8.19;
 import "@openzeppelin/token/ERC20/ERC20.sol";
 import "@openzeppelin/access/Ownable.sol";
 import "@v3-core/interfaces/IUniswapV3Pool.sol";
+import "@v3-core/interfaces/callback/IUniswapV3SwapCallback.sol";
 import "./interfaces/IWETH9.sol";
 
-contract AutoBuyContract is Ownable {
+contract AutoBuyContract is Ownable, IUniswapV3SwapCallback {
     uint160 internal constant MIN_SQRT_RATIO = 4295128739; // (from TickMath) The minimum value that can be returned from getSqrtRatioAtTick
     uint256 constant MAX_INT = 2**256 - 1;
 
@@ -45,7 +46,10 @@ contract AutoBuyContract is Ownable {
     /// @param _data Data passed in by the swap operation.
     function uniswapV3SwapCallback(int256 _amount0Delta, int256 _amount1Delta, bytes calldata _data)
         external
+        override
     {
+        _data; // so the compiler doesn't yell at me
+
         // Make sure this call is being made from within the swap execution.
         if (msg.sender != address(pool)) revert UnauthorizedPool();
 
