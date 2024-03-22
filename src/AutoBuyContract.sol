@@ -43,13 +43,11 @@ contract AutoBuyContract is Ownable, IUniswapV3SwapCallback {
     /// @notice The Uniswap V3 pool callback where the token transfer is expected to happen.
     /// @param _amount0Delta The amount of token 0 being used for the swap.
     /// @param _amount1Delta The amount of token 1 being used for the swap.
-    /// @param _data Data passed in by the swap operation.
-    function uniswapV3SwapCallback(int256 _amount0Delta, int256 _amount1Delta, bytes calldata _data)
+    /// Last param - Data passed in by the swap operation.
+    function uniswapV3SwapCallback(int256 _amount0Delta, int256 _amount1Delta, bytes calldata)
         external
         override
     {
-        _data; // so the compiler doesn't yell at me
-
         // Make sure this call is being made from within the swap execution.
         if (msg.sender != address(pool)) revert UnauthorizedPool();
 
