@@ -26,7 +26,7 @@ contract AutoBuyContract is Ownable, IUniswapV3SwapCallback {
     }
 
     /**
-     * @dev This pool needs to have the token this contract should buy as token1, and WETH as token0.
+     * @dev This pool needs to have WETH as token0 and the token this contract should buy as token1.
      */
     function setPool(IUniswapV3Pool pool_) public onlyOwner {
         pool = pool_;
