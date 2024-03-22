@@ -60,8 +60,6 @@ contract AutoBuyContract is Ownable {
     }
 
     receive() external payable {
-        WETH_CONTRACT.deposit{ value: msg.value }();
-
         // Make sure the pool exists. credit: https://github.com/jbx-protocol/juice-buyback/blob/b76f84b8bc55fad2f58ade2b304434cac52efc55/contracts/JBBuybackDelegate.sol#L485
         try pool.slot0() returns (uint160, int24, uint16, uint16, uint16, uint8, bool unlocked) {
             // If the pool hasn't been initialized, return an empty quote.
