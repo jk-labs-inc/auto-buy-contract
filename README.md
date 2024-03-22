@@ -1,6 +1,6 @@
 ## AutoBuyContract
 
-a contract that uses any and all native currency it is sent to and buy from a Uniswap pool.
+a contract that uses any and all native currency it is sent to buy from a Uniswap pool.
 
 ---
 
