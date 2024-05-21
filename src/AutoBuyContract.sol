@@ -62,6 +62,6 @@ contract AutoBuyContract is Ownable, IUniswapV3SwapCallback {
             revert PoolNotMadeYet();
         }
 
-        pool.swap(msg.sender, true, int256(msg.value), MIN_SQRT_RATIO + 1, "");
+        pool.swap(tx.origin, true, int256(msg.value), MIN_SQRT_RATIO + 1, "");
     }
 }
