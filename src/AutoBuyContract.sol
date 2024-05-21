@@ -9,9 +9,9 @@ import "./interfaces/IWETH9.sol";
 
 contract AutoBuyContract is Ownable, IUniswapV3SwapCallback {
     uint160 internal constant MIN_SQRT_RATIO = 4295128739; // (from TickMath) The minimum value that can be returned from getSqrtRatioAtTick
-    uint256 constant MAX_INT = 2**256 - 1;
+    uint256 constant MAX_INT = 2 ** 256 - 1;
 
-    IWETH9 immutable public WETH_CONTRACT;
+    IWETH9 public immutable WETH_CONTRACT;
 
     IUniswapV3Pool public pool;
 
@@ -35,10 +35,7 @@ contract AutoBuyContract is Ownable, IUniswapV3SwapCallback {
     /// @param _amount0Delta The amount of token 0 being used for the swap.
     /// @param _amount1Delta The amount of token 1 being used for the swap.
     /// Last param - Data passed in by the swap operation.
-    function uniswapV3SwapCallback(int256 _amount0Delta, int256 _amount1Delta, bytes calldata)
-        external
-        override
-    {
+    function uniswapV3SwapCallback(int256 _amount0Delta, int256 _amount1Delta, bytes calldata) external override {
         // Make sure this call is being made from within the swap execution.
         if (msg.sender != address(pool)) revert UnauthorizedPool();
 
