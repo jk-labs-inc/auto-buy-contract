@@ -7,7 +7,7 @@ import "@v3-core/interfaces/IUniswapV3Pool.sol";
 import "@v3-core/interfaces/callback/IUniswapV3SwapCallback.sol";
 import "./interfaces/IWETH9.sol";
 
-contract AutoBuyContract is Ownable, IUniswapV3SwapCallback {
+contract AutoLiquidateContract is Ownable, IUniswapV3SwapCallback {
     uint160 internal constant MIN_SQRT_RATIO = 4295128739; // (from TickMath) The minimum value that can be returned from getSqrtRatioAtTick
     uint256 constant MAX_INT = 2 ** 256 - 1;
 
