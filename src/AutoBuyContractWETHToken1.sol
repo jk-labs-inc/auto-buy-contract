@@ -8,7 +8,7 @@ import "@v3-core/interfaces/callback/IUniswapV3SwapCallback.sol";
 import "./interfaces/IWETH9.sol";
 
 contract AutoBuyContractWETHToken1 is Ownable, IUniswapV3SwapCallback {
-    uint160 internal constant MAX_SQRT_RATIO = 1461446703485210103287273052203988822378723970342; // (from TickMath) The minimum value that can be returned from getSqrtRatioAtTick
+    uint160 internal constant MAX_SQRT_RATIO = 1461446703485210103287273052203988822378723970342; // (from TickMath) The maximum value that can be returned from getSqrtRatioAtTick
     uint256 constant MAX_INT = 2 ** 256 - 1;
 
     IWETH9 public immutable WETH_CONTRACT;
