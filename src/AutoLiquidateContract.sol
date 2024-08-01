@@ -14,13 +14,15 @@ contract AutoBuyContract is Ownable, IUniswapV3SwapCallback {
     IWETH9 public immutable WETH_CONTRACT;
 
     IUniswapV3Pool public pool;
+    address public proceedsRecipient;
 
     error PoolNotMadeYet();
     error UnauthorizedPool();
 
-    constructor(IWETH9 weth_contract_, IUniswapV3Pool pool_) Ownable() {
+    constructor(IWETH9 weth_contract_, IUniswapV3Pool pool_, address proceedsRecipient_) Ownable() {
         WETH_CONTRACT = weth_contract_;
         pool = pool_;
+        proceedsRecipient = proceedsRecipient_; 
     }
 
     /**
@@ -28,6 +30,13 @@ contract AutoBuyContract is Ownable, IUniswapV3SwapCallback {
      */
     function setPool(IUniswapV3Pool pool_) public onlyOwner {
         pool = pool_;
+    }
+
+    /**
+     * @dev The address that will recieve the liquidation proceeds.
+     */
+    function setProceedsRecipient(address proceedsRecipient_) public onlyOwner {
+        proceedsRecipient = proceedsRecipient_; 
     }
 
     /// credit: https://github.com/jbx-protocol/juice-buyback/blob/b76f84b8bc55fad2f58ade2b304434cac52efc55/contracts/JBBuybackDelegate.sol#L323
@@ -59,6 +68,6 @@ contract AutoBuyContract is Ownable, IUniswapV3SwapCallback {
             revert PoolNotMadeYet();
         }
 
-        pool.swap(tx.origin, true, int256(msg.value), MIN_SQRT_RATIO + 1, "");
+        pool.swap(proceedsRecipient, true, int256(msg.value), MIN_SQRT_RATIO + 1, "");
     }
 }
