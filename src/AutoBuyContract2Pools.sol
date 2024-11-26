@@ -48,7 +48,7 @@ contract AutoBuyContract2Pools is Ownable, IUniswapV3SwapCallback {
     /// Last param - Data passed in by the swap operation.
     function uniswapV3SwapCallback(int256 _amount0Delta, int256 _amount1Delta, bytes calldata) external override {
         // Make sure this call is being made from within the swap execution.
-        if (msg.sender != address(pool1) || msg.sender != address(pool2)) revert UnauthorizedPool();
+        if (msg.sender != address(pool1) && msg.sender != address(pool2)) revert UnauthorizedPool();
 
         // Keep a reference to the amount of tokens that should be sent to fulfill the swap (the positive delta)
         uint256 _amountToSendToPool = _amount0Delta < 0 ? uint256(_amount1Delta) : uint256(_amount0Delta);
