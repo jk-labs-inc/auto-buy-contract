@@ -9,6 +9,7 @@ import "./interfaces/IWETH9.sol";
 
 contract AutoLiquidateContract is Ownable, IUniswapV3SwapCallback {
     uint160 internal constant MIN_SQRT_RATIO = 4295128739; // (from TickMath) The minimum value that can be returned from getSqrtRatioAtTick
+    uint160 internal constant MAX_SQRT_RATIO = 1461446703485210103287273052203988822378723970342; // (from TickMath) The maximum value that can be returned from getSqrtRatioAtTick
     uint256 constant MAX_INT = 2 ** 256 - 1;
 
     IWETH9 public immutable WETH_CONTRACT;
@@ -26,7 +27,7 @@ contract AutoLiquidateContract is Ownable, IUniswapV3SwapCallback {
     }
 
     /**
-     * @dev This pool needs to have WETH as token0 and the token this contract should buy as token1.
+     * @dev The pool that will be traded into.
      */
     function setPool(IUniswapV3Pool pool_) public onlyOwner {
         pool = pool_;
@@ -68,6 +69,9 @@ contract AutoLiquidateContract is Ownable, IUniswapV3SwapCallback {
             revert PoolNotMadeYet();
         }
 
-        pool.swap(proceedsRecipient, true, int256(msg.value), MIN_SQRT_RATIO + 1, "");
+        bool isWETHToken0 = pool.token0() == address(WETH_CONTRACT);
+        uint160 limitToUse = isWETHToken0 ? MIN_SQRT_RATIO + 1 : MAX_SQRT_RATIO - 1;
+
+        pool.swap(proceedsRecipient, isWETHToken0, int256(msg.value), limitToUse, "");
     }
 }
