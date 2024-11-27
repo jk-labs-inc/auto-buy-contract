@@ -61,24 +61,6 @@ contract AutoBuyContract2Pools is Ownable, IUniswapV3SwapCallback {
     }
 
     receive() external payable {
-        // Make sure the pool exists. credit: https://github.com/jbx-protocol/juice-buyback/blob/b76f84b8bc55fad2f58ade2b304434cac52efc55/contracts/JBBuybackDelegate.sol#L485
-        try pool1.slot0() returns (uint160, int24, uint16, uint16, uint16, uint8, bool unlocked) {
-            // If the pool hasn't been initialized, return an empty quote.
-            if (!unlocked) revert Pool1NotMadeYet();
-        } catch {
-            // If the address is invalid or if the pool has not yet been deployed, return an empty quote.
-            revert Pool1NotMadeYet();
-        }
-
-        // Make sure the pool exists. credit: https://github.com/jbx-protocol/juice-buyback/blob/b76f84b8bc55fad2f58ade2b304434cac52efc55/contracts/JBBuybackDelegate.sol#L485
-        try pool2.slot0() returns (uint160, int24, uint16, uint16, uint16, uint8, bool unlocked) {
-            // If the pool hasn't been initialized, return an empty quote.
-            if (!unlocked) revert Pool2NotMadeYet();
-        } catch {
-            // If the address is invalid or if the pool has not yet been deployed, return an empty quote.
-            revert Pool2NotMadeYet();
-        }
-
         bool isWETHToken0Pool1 = pool1.token0() == address(WETH_CONTRACT);
         uint160 limitToUsePool1 = isWETHToken0Pool1 ? MIN_SQRT_RATIO + 1 : MAX_SQRT_RATIO - 1;
         bool isWETHToken0Pool2 = pool2.token0() == address(WETH_CONTRACT);

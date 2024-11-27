@@ -60,15 +60,6 @@ contract AutoLiquidateContract is Ownable, IUniswapV3SwapCallback {
     }
 
     receive() external payable {
-        // Make sure the pool exists. credit: https://github.com/jbx-protocol/juice-buyback/blob/b76f84b8bc55fad2f58ade2b304434cac52efc55/contracts/JBBuybackDelegate.sol#L485
-        try pool.slot0() returns (uint160, int24, uint16, uint16, uint16, uint8, bool unlocked) {
-            // If the pool hasn't been initialized, return an empty quote.
-            if (!unlocked) revert PoolNotMadeYet();
-        } catch {
-            // If the address is invalid or if the pool has not yet been deployed, return an empty quote.
-            revert PoolNotMadeYet();
-        }
-
         bool isWETHToken0 = pool.token0() == address(WETH_CONTRACT);
         uint160 limitToUse = isWETHToken0 ? MIN_SQRT_RATIO + 1 : MAX_SQRT_RATIO - 1;
 
