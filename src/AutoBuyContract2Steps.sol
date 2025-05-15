@@ -14,6 +14,8 @@ contract AutoBuyContract2Steps is Ownable, IUniswapV3SwapCallback {
 
     IWETH9 public immutable WETH_CONTRACT;
 
+    address public firstToken;
+
     IUniswapV3Pool public pool1;
     IUniswapV3Pool public pool2;
 
@@ -21,10 +23,19 @@ contract AutoBuyContract2Steps is Ownable, IUniswapV3SwapCallback {
     error Pool2NotMadeYet();
     error UnauthorizedPool();
 
-    constructor(IWETH9 weth_contract_, IUniswapV3Pool pool1_, IUniswapV3Pool pool2_) Ownable() {
+    // pool1_ is wrapped native token to first token, pool2_ is first token to second token
+    constructor(IWETH9 weth_contract_, address firstToken_, IUniswapV3Pool pool1_, IUniswapV3Pool pool2_) Ownable() {
         WETH_CONTRACT = weth_contract_;
+        firstToken = firstToken_;
         pool1 = pool1_;
         pool2 = pool2_;
+    }
+
+    /**
+     * @dev The firstToken that will be traded into.
+     */
+    function setFirstToken(address newFirstToken_) public onlyOwner {
+        firstToken = newFirstToken_;
     }
 
     /**
@@ -53,20 +64,24 @@ contract AutoBuyContract2Steps is Ownable, IUniswapV3SwapCallback {
         // Keep a reference to the amount of tokens that should be sent to fulfill the swap (the positive delta)
         uint256 _amountToSendToPool = _amount0Delta < 0 ? uint256(_amount1Delta) : uint256(_amount0Delta);
 
-        // Wrap ETH into WETH
-        WETH_CONTRACT.deposit{value: _amountToSendToPool}();
-
-        // Transfer the token to the pool.
-        WETH_CONTRACT.transfer(msg.sender, _amountToSendToPool);
+        if (msg.sender == address(pool1)) {
+            // Wrap ETH into WETH
+            WETH_CONTRACT.deposit{value: _amountToSendToPool}();
+    
+            // Transfer the token to the pool.
+            WETH_CONTRACT.transfer(msg.sender, _amountToSendToPool);
+        } else {
+            ERC20(firstToken).transfer(msg.sender, _amountToSendToPool);
+        }
     }
 
     receive() external payable {
         bool isWETHToken0Pool1 = pool1.token0() == address(WETH_CONTRACT);
         uint160 limitToUsePool1 = isWETHToken0Pool1 ? MIN_SQRT_RATIO + 1 : MAX_SQRT_RATIO - 1;
-        bool isWETHToken0Pool2 = pool2.token0() == address(WETH_CONTRACT);
-        uint160 limitToUsePool2 = isWETHToken0Pool2 ? MIN_SQRT_RATIO + 1 : MAX_SQRT_RATIO - 1;
+        bool isFirstTokenToken0Pool2 = pool2.token0() == firstToken;
+        uint160 limitToUsePool2 = isFirstTokenToken0Pool2 ? MIN_SQRT_RATIO + 1 : MAX_SQRT_RATIO - 1;
 
-        pool1.swap(tx.origin, isWETHToken0Pool1, int256(msg.value / 2), limitToUsePool1, "");
-        pool2.swap(tx.origin, isWETHToken0Pool2, int256(msg.value - (msg.value / 2)), limitToUsePool2, "");
+        pool1.swap(address(this), isWETHToken0Pool1, int256(msg.value), limitToUsePool1, "");
+        pool2.swap(tx.origin, isFirstTokenToken0Pool2, int256(ERC20(firstToken).balanceOf(address(this))), limitToUsePool2, "");
     }
 }
