@@ -4,6 +4,14 @@ a contract that uses any and all native currency it is sent to buy from a Uniswa
 
 ---
 
+### Examples
+
+- [Abstract](https://abscan.org/address/0x331627e1bA6fC6Ae26990545d49B2BD1918cF748#internaltx)
+- [Base](https://basescan.org/address/0xfbbCa1B92e5B4C79ECf5e420ec8B44D36E43828D#internaltx)
+- [Avalanche](https://snowscan.xyz/address/0x003dA13b325cBa4d4477207871d8E7C7F2F5AD8E#internaltx)
+
+---
+
 ### To Deploy
 1. Install [Foundry](https://book.getfoundry.sh/) - you can get it by following the [instructions here](https://book.getfoundry.sh/getting-started/installation) under the "Use Foundryup" section. Namely:
     - Run `curl -L https://foundry.paradigm.xyz | bash`
